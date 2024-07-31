@@ -6,7 +6,7 @@ function App() {
   return (
     <div className="App">
       <Ratings noOfStars ={10} />
-      <ImageSlider url={'picsum.photos/v2/list'} limit={'10'} page={'1'}/>
+      <ImageSlider url={'https://picsum.photos/v2/list'} limit={'10'} page={'1'}/> 
     </div>
   );
 }
