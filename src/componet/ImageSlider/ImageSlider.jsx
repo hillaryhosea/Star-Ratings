@@ -1,65 +1,75 @@
-import React, { useEffect, useState } from 'react'
-import './ImageSlider.css'
-import { BsArrowLeftCircleFill, BsArrowRightCircleFill } from 'react-icons/bs';
+import React, { useEffect, useState } from "react";
+import "./ImageSlider.css";
+import { BsArrowLeftCircleFill, BsArrowRightCircleFill } from "react-icons/bs";
 
-export const ImageSlider = ({url, limit=5, page=1}) => {
+export const ImageSlider = ({ url, limit = 5, page = 1 }) => {
+  const [images, setImages] = useState([]);
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const [errorMsg, setErrorMsg] = useState(null);
+  const [loading, setLoading] = useState(false);
 
-    const [images, setImages] = useState([]);
-    const [currentSlide, setCurrentSlide] = useState(0);
-    const [errorMsg, setErrorMsg] = useState(null);
-    const [loading, setLoading] = useState(false);
+  async function fetchImages(getUrl) {
+    try {
+      setLoading(true);
 
-    async function fetchImages (getUrl){
-        try {
+      const reponse = await fetch(`${getUrl}?page=${page}&limit=${limit}`);
+      const data = await reponse.json();
 
-            setLoading(true)
-
-            const reponse = await fetch(`${getUrl}?page=${page}&limit=${limit}`);
-            const data = await reponse.json();
-
-            if(data) {
-                setImages(data)
-                setLoading(false)
-            }
-
-        } catch (e) {
-           setErrorMsg(e.message); 
-           setLoading(false)
-        }
+      if (data) {
+        setImages(data);
+        setLoading(false);
+      }
+    } catch (e) {
+      setErrorMsg(e.message);
+      setLoading(false);
     }
+  }
 
-    useEffect (()=> {
-        if(url !== '') fetchImages(url);
-    }, [url]);
+  function handleNext (){
+    setCurrentSlide(currentSlide === 0 ? images.length-1 : currentSlide-1)
+  }
+  function handlePrev(){
+    setCurrentSlide(currentSlide===  images.length -1 ? 0 : currentSlide + 1 )
+  }
 
-    console.log(images);
+  useEffect(() => {
+    if (url !== "") fetchImages(url);
+  }, [url]);
 
-    if (loading){
-        return <div> loading data please wait </div>
-    }
+  console.log(images);
 
-    if (errorMsg !== null){
-         return <div>error occured {errorMsg}</div>
-    }
+  if (loading) {
+    return <div> loading data please wait </div>;
+  }
+
+  if (errorMsg !== null) {
+    return <div>error occured {errorMsg}</div>;
+  }
 
   return (
-    <div className='container'>
-    <BsArrowLeftCircleFill className='arroe arrow-left'/>
-    {images && images.length
-     ? images.map((imageItem)=>(
-        <img
-            key={imageItem.id}
-            alt={imageItem.download_url}
-            src={imageItem.download_url}
-            className='current-image'
-        />    
-     ))
-     : null
-    }
-    <BsArrowRightCircleFill className='arrow arrow-right'/>
-    <span className='circle-indicators'/>
+    <div className="container">
+      <BsArrowLeftCircleFill onClick={handlePrev} className="arrow arrow-left" />
+      {images && images.length
+        ? images.map((imageItem, index) => (
+            <img
+              key={imageItem.id}
+              alt={imageItem.download_url}
+              src={imageItem.download_url}
+              className= {currentSlide === index ? 'current-image' :'current-image  hide-current-image'}
+            />
+          ))
+        : null}
+      <BsArrowRightCircleFill onClick={handleNext} className="arrow arrow-right" />
+      <span className="circle-indicators">
+        {images && images.length
+          ? images.map((_, index) => {
+              <button key={index} className={currentSlide === index ? 'current-indicator' :'current-indicator  hide-current-indicator'}></button>;
+            })
+          : null}
+          {/* onClick {() =>} */}
+      </span>
     </div>
-  )
-}
+  );
+};
 
 export default ImageSlider;
